@@ -1,51 +1,83 @@
-import { renderBlock } from './lib.js';
+import { placesCoordinates, renderBlock, renderToast } from './lib.js';
+import { renderSearchResultsBlock } from './search-results.js';
 
 export interface SearchFormData {
   city: string;
-  checkinDate: string;
-  checkoutDate: string;
+  checkinDate: number;
+  checkoutDate: number;
   maxPrice: number;
 }
 
-interface Place {
-  result: string[];
+export interface Place {
+  bookedDates: unknown[];
+  description: string;
+  id: number;
+  image: string;
+  name: string;
+  price: number;
+  remoteness: number;
 }
 
 interface PlaceCallback {
-  (error?: Error, result?: Place): void;
+  (error?: Error, result?: Place[]): void;
 }
 
 export const callback: PlaceCallback = (error, result) => {
   if (error === null && result !== null) {
-    console.log('Success');
+    renderSearchResultsBlock(result);
   } else {
-    console.log('Error', error.message);
+    renderToast({ type: 'error', text: 'Повторите поиск' });
   }
 };
 
-export function search(
+export async function search(
   searchParams: SearchFormData,
   callback: PlaceCallback
-): void {
-  console.log(searchParams);
+): Promise<void> {
+  const f = await fetch(
+    `http://127.0.0.1:8080/places?coordinates=${placesCoordinates.get(
+      searchParams.city
+    )}&checkInDate=${searchParams.checkinDate}&checkOutDate=${
+      searchParams.checkoutDate
+    }&maxPrice=${+searchParams.maxPrice}`,
+    {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json;charset=utf-8',
+      },
+    }
+  );
+  const d = await f.json();
+
   setTimeout(() => {
     if (Math.random() > 0.5) {
-      callback(null, { result: [] });
+      callback(null, d);
+      setTimeout(() => {
+        renderToast(
+          { text: 'Поиск устарел. Повторите поиск', type: 'error' },
+          {
+            name: 'Повторить поиск',
+            handler: () => {
+              search(collectSearchParams(), callback);
+            },
+          }
+        );
+      }, 20000);
     } else {
       callback(new Error('My Error'));
     }
-  }, 2000);
+  }, 500);
 }
 
 export function collectSearchParams(): SearchFormData {
   return {
     city: (document.getElementById('city') as HTMLTextAreaElement).value,
-    checkinDate: (
-      document.getElementById('check-in-date') as HTMLTextAreaElement
-    ).value,
-    checkoutDate: (
-      document.getElementById('check-out-date') as HTMLTextAreaElement
-    ).value,
+    checkinDate: +new Date(
+      (document.getElementById('check-in-date') as HTMLTextAreaElement).value
+    ),
+    checkoutDate: +new Date(
+      (document.getElementById('check-out-date') as HTMLTextAreaElement).value
+    ),
     maxPrice: +(document.getElementById('max-price') as HTMLTextAreaElement)
       .value,
   };

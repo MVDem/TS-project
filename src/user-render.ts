@@ -1,17 +1,12 @@
 import { renderBlock } from './lib.js';
+import { FavouritePlace } from './search-results.js';
 import { User } from './User.js';
-
-export interface FavouritePlace {
-  id: string;
-  name: string;
-  img: string;
-}
 
 export function getUserData(): User {
   const user: unknown = JSON.parse(localStorage.getItem('user'));
   if (user === null) {
     console.log('Данные для user отсутствуют');
-    return null;
+    return;
   }
   if (user instanceof User) {
     return user;
@@ -22,19 +17,14 @@ export function getUserData(): User {
 }
 
 export function getFavoritesAmount(): number {
-  const favoritesAmount: unknown = JSON.parse(
+  const favoritesAmount: FavouritePlace[] = JSON.parse(
     localStorage.getItem('favoritesAmount')
   );
   if (favoritesAmount === null) {
     console.log('Данные для favoritesAmount отсутствуют');
     return null;
   }
-  if (typeof favoritesAmount === 'number') {
-    return favoritesAmount;
-  } else {
-    console.log('Данные для favoritesAmount некорректны');
-    return null;
-  }
+  return favoritesAmount?.length;
 }
 
 export function renderUserBlock(
@@ -50,9 +40,11 @@ export function renderUserBlock(
     'user-block',
     `
     <div class="header-container">
-      <img class="avatar" src="${user?.userAvatarUrl}" alt="Wade Warren" />
+      <img class="avatar" src="${
+        user?.userAvatarUrl ? user?.userAvatarUrl : './img/avatar.png'
+      }" alt="Wade Warren" />
       <div class="info">
-          <p class="name">${user?.userName}</p>
+          <p class="name">${user?.userName ? user?.userName : 'Joe Jonson'}</p>
           <p class="fav">
             <i class="heart-icon${
               hasFavoriteItems ? ' active' : ''
