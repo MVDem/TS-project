@@ -1,13 +1,104 @@
-import { renderBlock, getRenderFormParams } from './lib.js';
+import { placesCoordinates, renderBlock, renderToast } from './lib.js';
+import { renderSearchResultsBlock } from './search-results.js';
+
+export interface SearchFormData {
+  city: string;
+  checkinDate: number;
+  checkoutDate: number;
+  maxPrice: number;
+}
+
+export interface Place {
+  bookedDates: unknown[];
+  description: string;
+  id: number;
+  image: string;
+  name: string;
+  price: number;
+  remoteness: number;
+}
+
+interface PlaceCallback {
+  (error?: Error, result?: Place[]): void;
+}
+
+export const callback: PlaceCallback = (error, result) => {
+  if (error === null && result !== null) {
+    renderSearchResultsBlock(result);
+  } else {
+    renderToast({ type: 'error', text: 'Повторите поиск' });
+  }
+};
+
+export async function search(
+  searchParams: SearchFormData,
+  callback: PlaceCallback
+): Promise<void> {
+  const f = await fetch(
+    `http://127.0.0.1:8080/places?coordinates=${placesCoordinates.get(
+      searchParams.city
+    )}&checkInDate=${searchParams.checkinDate}&checkOutDate=${
+      searchParams.checkoutDate
+    }&maxPrice=${+searchParams.maxPrice}`,
+    {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json;charset=utf-8',
+      },
+    }
+  );
+  const d = await f.json();
+
+  setTimeout(() => {
+    if (Math.random() > 0.5) {
+      callback(null, d);
+      setTimeout(() => {
+        renderToast(
+          { text: 'Поиск устарел. Повторите поиск', type: 'error' },
+          {
+            name: 'Повторить поиск',
+            handler: () => {
+              search(collectSearchParams(), callback);
+            },
+          }
+        );
+      }, 20000);
+    } else {
+      callback(new Error('My Error'));
+    }
+  }, 500);
+}
+
+export function collectSearchParams(): SearchFormData {
+  return {
+    city: (document.getElementById('city') as HTMLTextAreaElement).value,
+    checkinDate: +new Date(
+      (document.getElementById('check-in-date') as HTMLTextAreaElement).value
+    ),
+    checkoutDate: +new Date(
+      (document.getElementById('check-out-date') as HTMLTextAreaElement).value
+    ),
+    maxPrice: +(document.getElementById('max-price') as HTMLTextAreaElement)
+      .value,
+  };
+}
 
 export function renderSearchFormBlock(
-  ckeckinDate?: string,
-  ckeckoutDate?: string
+  checkinDate?: string,
+  checkoutDate?: string
 ): void {
-  const { checkinDate, checkoutDate, minDate, maxDate } = getRenderFormParams(
-    ckeckinDate,
-    ckeckoutDate
-  );
+  const minDate = new Date().toISOString().slice(0, 10);
+
+  const today = new Date();
+  const month = new Date().getMonth() === 12 ? 1 : new Date().getMonth() + 1;
+  const nextMonthLastDay = new Date(today.getFullYear(), month + 1, 0);
+  const maxDate = nextMonthLastDay.toISOString().slice(0, 10);
+
+  const tempDate = new Date();
+  tempDate.setDate(today.getDate() + 1);
+  checkinDate = tempDate.toISOString().slice(0, 10);
+  tempDate.setDate(tempDate.getDate() + 2);
+  checkoutDate = tempDate.toISOString().slice(0, 10);
 
   renderBlock(
     'search-form-block',

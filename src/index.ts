@@ -1,10 +1,19 @@
-import { renderSearchFormBlock } from './search-form.js';
+import {
+  callback,
+  collectSearchParams,
+  renderSearchFormBlock,
+  search,
+} from './search-form.js';
 import { renderSearchStubBlock } from './search-results.js';
-import { renderUserBlock } from './user-render.js';
-import { renderToast, collectSearchParams } from './lib.js';
+import {
+  renderUserBlock,
+  getFavoritesAmount,
+  getUserData,
+} from './user-render.js';
+import { renderToast } from './lib.js';
 
 window.addEventListener('DOMContentLoaded', () => {
-  renderUserBlock('1', '/img/avatar.png', 'Wade Warren');
+  renderUserBlock(getUserData(), getFavoritesAmount());
   renderSearchFormBlock();
   renderSearchStubBlock();
   renderToast(
@@ -22,6 +31,6 @@ window.addEventListener('DOMContentLoaded', () => {
   const searchFormBlock = document.getElementById('search-form-block');
   searchFormBlock.addEventListener('submit', (e) => {
     e.preventDefault();
-    console.log(collectSearchParams());
+    search(collectSearchParams(), callback);
   });
 });
