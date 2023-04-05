@@ -10,7 +10,13 @@ import {
   getFavoritesAmount,
   getUserData,
 } from './user-render.js';
-import { renderToast } from './lib.js';
+import { renderToast, replacer, reviver } from './lib.js';
+
+import {
+  FlatRentSdk,
+  FlatRentFlat,
+  FlatRentParameters,
+} from './typescript-flatrent-sdk/public/scripts/flat-rent-sdk.js';
 
 window.addEventListener('DOMContentLoaded', () => {
   renderUserBlock(getUserData(), getFavoritesAmount());
