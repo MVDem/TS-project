@@ -12,12 +12,19 @@ export const placesCoordinates = new Map<string, string>();
 
 placesCoordinates.set('Санкт-Петербург', '59.9386,30.3141');
 
-export function renderBlock(elementId, html) {
+export function renderBlock(elementId: string, html: string) {
   const element = document.getElementById(elementId);
-  element.innerHTML = html;
+  if (element instanceof HTMLElement) {
+    element.innerHTML = html;
+  } else {
+    console.log('lib.ts: element is not HTMElement');
+  }
 }
 
-export function renderToast(message: toastMessage, action?: toastAction): void {
+export function renderToast(
+  message: toastMessage | null,
+  action?: toastAction
+): void {
   let messageText = '';
 
   if (message != null) {
@@ -37,7 +44,7 @@ export function renderToast(message: toastMessage, action?: toastAction): void {
       if (action != null && action.handler != null) {
         action.handler();
       }
-      renderToast(null, null);
+      renderToast(null);
     };
   }
 }
@@ -58,7 +65,7 @@ export function replacer<V>(key: string, value: V): JSONreplacer | V {
   }
 }
 
-export function reviver(key, value) {
+export function reviver(key: string, value: any) {
   if (typeof value === 'object' && value !== null) {
     if (value.dataType === 'Map') {
       return new Map(value.value);
