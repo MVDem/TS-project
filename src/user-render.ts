@@ -1,6 +1,6 @@
 import { renderBlock } from './lib.js';
 import { FavouritePlace } from './search-results.js';
-import { User } from './User.js';
+import { User } from './user.js';
 
 export function getUserData(): User {
   const user: unknown = JSON.parse(localStorage.getItem('user'));
