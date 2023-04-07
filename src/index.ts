@@ -1,22 +1,12 @@
-import {
-  callback,
-  collectSearchParams,
-  renderSearchFormBlock,
-  search,
-} from './search-form.js';
+import { callback, collectSearchParams, search } from './search.js';
 import { renderSearchStubBlock } from './search-results.js';
 import {
   renderUserBlock,
   getFavoritesAmount,
   getUserData,
 } from './user-render.js';
-import { renderToast, replacer, reviver } from './lib.js';
-
-import {
-  FlatRentSdk,
-  FlatRentFlat,
-  FlatRentParameters,
-} from './typescript-flatrent-sdk/public/scripts/flat-rent-sdk.js';
+import { renderToast } from './lib.js';
+import { renderSearchFormBlock } from './search-form-render.js';
 
 window.addEventListener('DOMContentLoaded', () => {
   renderUserBlock(getUserData(), getFavoritesAmount());

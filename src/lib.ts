@@ -51,7 +51,7 @@ export function replacer<V>(key: string, value: V): JSONreplacer | V {
   if (value instanceof Map) {
     return {
       dataType: 'Map',
-      value: Array.from(value.entries()), // or with spread: value: [...value]
+      value: Array.from(value.entries()),
     };
   } else {
     return value;
@@ -65,4 +65,10 @@ export function reviver(key, value) {
     }
   }
   return value;
+}
+
+export enum sortType {
+  cheap = 'cheap',
+  expensive = 'expensive',
+  close = 'close',
 }
